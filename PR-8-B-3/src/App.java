@@ -1,129 +1,93 @@
-import javafx.animation.KeyFrame;
-import javafx.animation.Timeline;
 import javafx.application.Application;
-import javafx.geometry.Insets;
-import javafx.geometry.Pos;
+import javafx.stage.Stage;
 import javafx.scene.Scene;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
-import javafx.scene.control.TextField;
-import javafx.scene.image.Image;
-import javafx.scene.image.ImageView;
-import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
-import javafx.scene.layout.HBox;
+import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.StackPane;
+import javafx.scene.control.Button;
+import javafx.scene.control.TextField;
+import javafx.scene.control.Label;
+import javafx.animation.Timeline;
+import javafx.animation.KeyFrame;
 import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
-import javafx.stage.Stage;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
+import javafx.geometry.Pos;
 import javafx.util.Duration;
 
 public class App extends Application {
+	protected TextField tfSpeed = new TextField();
+	protected TextField tfPrefix = new TextField();
+	protected TextField tfNumberOfImages = new TextField();
+	protected TextField tfURL = new TextField();
+	protected StackPane paneForImage = new StackPane();
+	protected Timeline animation;
+	protected int n = 1;
 
-    @Override
-    public void start(Stage primaryStage) throws Exception {
+	@Override
+	public void start(Stage primaryStage) {
+		final int COLUMN_COUNT = 27;
+		tfSpeed.setPrefColumnCount(COLUMN_COUNT);
+		tfPrefix.setPrefColumnCount(COLUMN_COUNT);
+		tfNumberOfImages.setPrefColumnCount(COLUMN_COUNT);
+		tfURL.setPrefColumnCount(COLUMN_COUNT);
 
-        TextAnimationPane pane = new TextAnimationPane();
+		Button btStart = new Button("Start Animation");
 
-        primaryStage.setScene(new Scene(pane, 575, 600));
-        primaryStage.setTitle("Text Animation");
-        primaryStage.show();
-    }
+		GridPane paneForInfo = new GridPane();
+		paneForInfo.setAlignment(Pos.CENTER);
+		paneForInfo.add(new Label("Enter information for animation"), 0, 0);
+		paneForInfo.add(new Label("Animation speed in milliseconds"), 0, 1);
+		paneForInfo.add(tfSpeed, 1, 1);
+		paneForInfo.add(new Label("Image file prefix"), 0, 2);
+		paneForInfo.add(tfPrefix, 1, 2);
+		paneForInfo.add(new Label("Number of images"), 0, 3);
+		paneForInfo.add(tfNumberOfImages, 1, 3);
+		paneForInfo.add(new Label("Audio file URL"), 0, 4);
+		paneForInfo.add(tfURL, 1, 4);
 
-    private class TextAnimationPane extends BorderPane {
+		BorderPane pane = new BorderPane();
+		pane.setBottom(paneForInfo);
+		pane.setCenter(paneForImage);
+		pane.setTop(btStart);
+		BorderPane.setAlignment(btStart, Pos.TOP_RIGHT);
 
-        Button btStartAnimation = new Button("Start Animation");
+		animation = new Timeline(
+				new KeyFrame(Duration.millis(1000), e -> nextImage()));
+		animation.setCycleCount(Timeline.INDEFINITE);
 
-        long animationSpeed;
-        int numOfImages;
-        int currentImgNum = 1;
-        String url;
-        String prefix;
-        String imgDir = "/image/";
-        String imgExtension = ".gif";
+		btStart.setOnAction(e -> {
+			if (tfURL.getText().length() > 0) {
+				MediaPlayer mediaPlayer = new MediaPlayer(
+						new Media(tfURL.getText()));
+				mediaPlayer.play();
+			}
+			if (tfSpeed.getText().length() > 0)
+				animation.setRate(Integer.parseInt(tfSpeed.getText()));
+			animation.play();
+		});
 
-        Timeline timeline = null;
+		Scene scene = new Scene(pane, 550, 680);
+		primaryStage.setTitle("Practical-8-B-3");
+		primaryStage.setScene(scene);
+		primaryStage.show();
+	}
 
-        StackPane centerPane = new StackPane();
+	private void getImage() {
+		paneForImage.getChildren().clear();
+		paneForImage.getChildren().add(new ImageView(new Image(
+				"C://Users//Karan Shah//Desktop//JavaFX-Programs//PR-8-B-3//src//images" +
+						tfPrefix.getText() + n + ".gif")));
+	}
 
-        TextAnimationPane() {
+	private void nextImage() {
+		n = n < Integer.parseInt(
+				tfNumberOfImages.getText()) ? n += 1 : 1;
+		getImage();
+	}
 
-            setCenter(centerPane);
-
-            HBox topPane = new HBox(btStartAnimation);
-            topPane.setAlignment(Pos.CENTER_RIGHT);
-            setTop(topPane);
-
-            GridPane bottomPane = new GridPane();
-            bottomPane.setPadding(new Insets(5));
-            bottomPane.setHgap(5);
-
-            Label lblInfo = new Label("Enter information for animation");
-            bottomPane.add(lblInfo, 0, 0);
-
-            TextField tfAnimationSpeed = new TextField();
-            tfAnimationSpeed.setPrefColumnCount(30);
-            Label lblAnimationSpeed = new Label("Animation Speed");
-            bottomPane.add(lblAnimationSpeed, 0, 1);
-            bottomPane.add(tfAnimationSpeed, 1, 1);
-
-            TextField tfImagePrefix = new TextField();
-            tfImagePrefix.setPrefColumnCount(30);
-            Label lblImagePrefix = new Label("Image file prefix");
-            bottomPane.add(lblImagePrefix, 0, 2);
-            bottomPane.add(tfImagePrefix, 1, 2);
-
-            TextField tfNumberOfImages = new TextField();
-            tfNumberOfImages.setPrefColumnCount(30);
-            Label lblNumberOfImages = new Label("Number of Images");
-            bottomPane.add(lblNumberOfImages, 0, 3);
-            bottomPane.add(tfNumberOfImages, 1, 3);
-
-            TextField tfAudioFileUrl = new TextField();
-            tfAudioFileUrl.setPrefColumnCount(30);
-            Label lblAudioFileUrl = new Label("Audio file URL");
-            bottomPane.add(lblAudioFileUrl, 0, 4);
-            bottomPane.add(tfAudioFileUrl, 1, 4);
-
-            setBottom(bottomPane);
-
-            btStartAnimation.setOnAction(e -> {
-                animationSpeed = Long.parseLong(tfAnimationSpeed.getText().trim());
-                prefix = tfImagePrefix.getText().trim();
-                numOfImages = Integer.parseInt(tfNumberOfImages.getText());
-                url = tfAudioFileUrl.getText();
-                initTimeline();
-            });
-        }
-
-        private void initTimeline() {
-            if (timeline != null) {
-                timeline.stop();
-                timeline = null;
-                currentImgNum = 1;
-            }
-
-            timeline = new Timeline(
-                    new KeyFrame(Duration.millis(animationSpeed), e -> nextImage()));
-
-            MediaPlayer mp = new MediaPlayer(new Media(url));
-            mp.play();
-            mp.setCycleCount(MediaPlayer.INDEFINITE);
-            timeline.setOnFinished(event -> mp.stop());
-
-            timeline.setCycleCount(numOfImages);
-            timeline.play();
-        }
-
-        private void nextImage() {
-            centerPane.getChildren().clear();
-            centerPane.getChildren().add(
-                    new ImageView(new Image(imgDir + prefix + currentImgNum++ + imgExtension)));
-        }
-
-    }
-
-    public static void main(String[] args) {
-        Application.launch(args);
-    }
+	public static void main(String[] args) {
+		launch(args);
+	}
 }

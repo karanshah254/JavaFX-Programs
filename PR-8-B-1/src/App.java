@@ -1,61 +1,88 @@
 import javafx.application.Application;
-import javafx.collections.FXCollections;
+import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import javafx.scene.Scene;
+import javafx.scene.control.CheckBox;
 import javafx.scene.control.ComboBox;
+import javafx.scene.control.ContentDisplay;
 import javafx.scene.control.Label;
+import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontPosture;
 import javafx.scene.text.FontWeight;
+import javafx.scene.text.Text;
 import javafx.stage.Stage;
 
 public class App extends Application {
-
-    private Label textLabel;
+    Text text = new Text("Programming is fun");
+    ComboBox<String> cbFontFamilies = new ComboBox<>();
+    CheckBox chkBold = new CheckBox("Bold");
+    ComboBox<Integer> cbFontSize = new ComboBox<>();
+    CheckBox chkItalic = new CheckBox("Italic");
 
     @Override
-    public void start(Stage primaryStage) {
-        StackPane root = new StackPane();
-        textLabel = new Label("Programming IS Fun ....");
-        textLabel.setFont(Font.font("Arial", 50));
+    public void start(Stage primaryStage) throws Exception {
+        Integer[] sizes = new Integer[100];
 
-        ComboBox<String> fontComboBox = new ComboBox<>(FXCollections.observableArrayList(Font.getFamilies()));
-        fontComboBox.setValue("Arial");
-        ComboBox<Integer> fontSizeComboBox = new ComboBox<>(FXCollections.observableArrayList(generateFontSizeList()));
-        fontSizeComboBox.setValue(50);
-
-        fontComboBox.setOnAction(e -> changeFont());
-        fontSizeComboBox.setOnAction(e -> changeFont());
-        root.getChildren().addAll(textLabel, fontComboBox, fontSizeComboBox);
-
-        Scene scene = new Scene(root, 400, 200);
-        primaryStage.setScene(scene);
-        primaryStage.setTitle("Practical 8-B-1");
-        primaryStage.show();
-    }
-
-    private void changeFont() {
-        boolean isBold = textLabel.getFont().getStyle().contains("Bold");
-        boolean isItalic = textLabel.getFont().getStyle().contains("Italic");
-
-        String newFont = ((ComboBox<String>) ((ComboBox<?>) textLabel.getParent().getChildrenUnmodifiable().get(1)))
-                .getValue();
-        int newFontSize = ((ComboBox<Integer>) ((ComboBox<?>) textLabel.getParent().getChildrenUnmodifiable().get(2)))
-                .getValue();
-
-        textLabel.setFont(Font.font(newFont, isBold ? FontWeight.BOLD : FontWeight.NORMAL,
-                isItalic ? FontPosture.ITALIC : FontPosture.REGULAR, newFontSize));
-    }
-
-    private Integer[] generateFontSizeList() {
-        Integer[] fontSizeList = new Integer[100];
         for (int i = 0; i < 100; i++) {
-            fontSizeList[i] = i + 1;
+            sizes[i] = i + 1;
         }
-        return fontSizeList;
+
+        cbFontFamilies.getItems().addAll(Font.getFamilies());
+        cbFontFamilies.setValue(text.getFont().getFamily());
+        cbFontFamilies.setOnAction(e -> update());
+        Label lblFontFamilies = new Label("Font Name", cbFontFamilies);
+        lblFontFamilies.setContentDisplay(ContentDisplay.RIGHT);
+
+        cbFontSize.getItems().addAll(getSizes());
+        cbFontSize.setValue((int) text.getFont().getSize());
+        cbFontSize.setOnAction(e -> {
+            update();
+            primaryStage.sizeToScene();
+        });
+        Label lblFontSizes = new Label("Font Size", cbFontSize);
+        lblFontSizes.setContentDisplay(ContentDisplay.RIGHT);
+
+        HBox topPane = new HBox(lblFontFamilies, lblFontSizes);
+        topPane.setSpacing(5);
+        topPane.setPadding(new Insets(5));
+
+        chkBold.setOnAction(e -> update());
+        chkItalic.setOnAction(e -> update());
+
+        HBox bottomPane = new HBox(chkBold, chkItalic);
+        bottomPane.setAlignment(Pos.CENTER);
+
+        StackPane centerPane = new StackPane(text);
+        BorderPane borderPane = new BorderPane(centerPane);
+        borderPane.setTop(topPane);
+        borderPane.setBottom(bottomPane);
+        primaryStage.setTitle("Text Changer");
+        primaryStage.setScene(new Scene(borderPane));
+        primaryStage.show();
+
+    }
+
+    private void update() {
+        FontWeight fontWeight = (chkBold.isSelected()) ? FontWeight.BOLD : FontWeight.NORMAL;
+        FontPosture fontPosture = (chkItalic.isSelected()) ? FontPosture.ITALIC : FontPosture.REGULAR;
+        String fontFamily = cbFontFamilies.getValue();
+        double size = cbFontSize.getValue();
+        text.setFont(Font.font(fontFamily, fontWeight, fontPosture, size));
+    }
+
+    private Integer[] getSizes() {
+        Integer[] sizes = new Integer[100];
+
+        for (int i = 0; i < 100; i++)
+            sizes[i] = i + 1;
+
+        return sizes;
     }
 
     public static void main(String[] args) {
-        launch(args);
+        Application.launch(args);
     }
 }
