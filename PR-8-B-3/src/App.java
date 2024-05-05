@@ -77,7 +77,7 @@ public class App extends Application {
 	private void getImage() {
 		paneForImage.getChildren().clear();
 		paneForImage.getChildren().add(new ImageView(new Image(
-				"C://Users//Karan Shah//Desktop//JavaFX-Programs//PR-8-B-3//src//images" +
+				"images/" +
 						tfPrefix.getText() + n + ".gif")));
 	}
 
