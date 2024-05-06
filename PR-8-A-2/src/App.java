@@ -1,50 +1,57 @@
 import javafx.application.Application;
+import javafx.geometry.Insets;
 import javafx.scene.Scene;
-import javafx.scene.chart.BarChart;
-import javafx.scene.chart.CategoryAxis;
-import javafx.scene.chart.NumberAxis;
-import javafx.scene.chart.XYChart;
-import javafx.scene.layout.VBox;
+import javafx.scene.layout.Pane;
+import javafx.scene.paint.Color;
+import javafx.scene.shape.Rectangle;
+import javafx.scene.text.Text;
 import javafx.stage.Stage;
 
 public class App extends Application {
+
+    // project - 20% - red
+    // quizzes - 10% - blue
+    // midterm - 30% - green
+    // final - 40% - orange
+    private static final double WIDTH = 400;
+    private static final double HEIGHT = 400;
+    private static final double LIMIT_HEIGHT = (HEIGHT / 2);
+    private static double[] percent = new double[] { 0.20, 0.10, 0.30, 0.40 };
+    private static String[] titles = new String[] {
+            "project -- " + String.format("%d%s", (int) (100 * percent[0]), "%"),
+            "quizzes -- " + String.format("%d%s", (int) (100 * percent[1]), "%"),
+            "midterm -- " + String.format("%d%s", (int) (100 * percent[2]), "%"),
+            "final -- " + String.format("%d%s", (int) (100 * percent[3]), "%")
+    };
+    private static Color[] colors = new Color[] { Color.RED, Color.BLUE, Color.GREEN, Color.ORANGE };
+
     @Override
     public void start(Stage primaryStage) {
-        // Data for the chart
-        XYChart.Series<String, Number> dataSeries = new XYChart.Series<>();
-        dataSeries.getData().add(new XYChart.Data<>("Projects", 20));
-        dataSeries.getData().add(new XYChart.Data<>("Quizzes", 10));
-        dataSeries.getData().add(new XYChart.Data<>("Midterm Exams", 30));
-        dataSeries.getData().add(new XYChart.Data<>("Final Exam", 40));
 
-        // Create the X and Y axes
-        CategoryAxis xAxis = new CategoryAxis();
-        xAxis.setLabel("Category");
-        NumberAxis yAxis = new NumberAxis();
-        yAxis.setLabel("Percentage");
+        Pane pane = new Pane();
+        pane.setPadding(new Insets(5, 10, 0, 10));
+        Rectangle[] bars = new Rectangle[4];
 
-        // Create the bar chart
-        BarChart<String, Number> barChart = new BarChart<>(xAxis, yAxis);
-        barChart.setTitle("Grade Distribution");
-        barChart.getData().add(dataSeries);
+        for (int i = 0; i < bars.length; i++) {
 
-        // Customize colors for each data point
-        dataSeries.getData().get(0).getNode().setStyle("-fx-bar-fill: red;");
-        dataSeries.getData().get(1).getNode().setStyle("-fx-bar-fill: blue;");
-        dataSeries.getData().get(2).getNode().setStyle("-fx-bar-fill: green;");
-        dataSeries.getData().get(3).getNode().setStyle("-fx-bar-fill: orange;");
+            bars[i] = new Rectangle(
+                    5 + (100 * i), // x
+                    LIMIT_HEIGHT - (HEIGHT * percent[i]), // y
+                    WIDTH / bars.length - 5, // width
+                    HEIGHT * percent[i]); // height
+            bars[i].setFill(colors[i]);
 
-        // Create a VBox to hold the chart
-        VBox root = new VBox(barChart);
+            Text text = new Text(5 + (100 * i), LIMIT_HEIGHT - (HEIGHT * percent[i]) - 5, titles[i]);
+            pane.getChildren().addAll(text, bars[i]);
 
-        // Create the scene and set it to the stage
-        Scene scene = new Scene(root, 600, 400);
-        primaryStage.setScene(scene);
-        primaryStage.setTitle("Practical 8-A-2");
+        }
+
+        primaryStage.setScene(new Scene(pane, WIDTH + 20, LIMIT_HEIGHT));
+        primaryStage.setTitle("Bar graph");
         primaryStage.show();
     }
 
     public static void main(String[] args) {
-        launch(args);
+        Application.launch(args);
     }
 }
