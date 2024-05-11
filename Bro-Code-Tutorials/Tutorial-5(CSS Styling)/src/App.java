@@ -12,6 +12,7 @@ public class App extends Application {
         Scene scene = new Scene(root);
         String css = this.getClass().getResource("app.css").toExternalForm();
         scene.getStylesheets().add(css);
+        primaryStage.setTitle("CSS Styling");
         primaryStage.setScene(scene);
         primaryStage.show();
     }

@@ -70,6 +70,8 @@ public class App extends Application {
         root.getChildren().add(traingle);
         root.getChildren().add(circle);
         root.getChildren().add(view);
+
+        primaryStage.setTitle("Drawing some of shapes");
         primaryStage.setScene(scene);
         primaryStage.show();
     }
