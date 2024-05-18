@@ -6,6 +6,13 @@
     "configurations": [
         {
             "type": "java",
+            "name": "xyz",
+            "request": "launch",
+            "mainClass": "xyz",
+            "projectName": "JavaFX-Programs_ef3d8bf8"
+        },
+        {
+            "type": "java",
             "name": "LibraryManagementSystem",
             "request": "launch",
             "mainClass": "LibraryManagementSystem",
